@@ -2,7 +2,11 @@
 'use strict';
 
 const AWS = require('aws-sdk');
-
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET,POST,PATCH,DELETE",
+  "Access-Control-Allow-Headers": "Authorization, authorization, Origin, X-Requested-With, Content-Type, Accept, X-Amz-Date, X-Api-Key, X-Amz-Security-Token, X-Amz-User-Agent"
+};
 class DynamoDB {
   constructor() {
     this.client = new AWS.DynamoDB.DocumentClient();
@@ -36,6 +40,7 @@ module.exports.create = async event => {
   await db.put(JSON.parse(event.body));
   return {
     statusCode: 200,
+    headers: CORS,
     body: JSON.stringify({
       input: JSON.parse(event.body),
     },
@@ -58,6 +63,16 @@ module.exports.go = async event => {
     }
   };
 };
+
+module.exports.decode = async event => {
+  const [response] = await db.get(event.pathParameters.id);
+  console.log(response);
+  return {
+    statusCode: 200,
+    headers: CORS,
+    body: JSON.stringify(response)
+  }
+}
 
 module.exports.hello = async event => {
   const db = new DynamoDB();
